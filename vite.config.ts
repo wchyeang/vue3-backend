@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import { existsSync, unlinkSync } from 'node:fs'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -11,6 +12,17 @@ export default defineConfig({
     vue(),
     vueJsx(),
     vueDevTools(),
+    {
+      name: 'remove-mock-worker-in-prod',
+      apply: 'build',
+      closeBundle() {
+        const target = fileURLToPath(new URL('./dist/mockServiceWorker.js', import.meta.url))
+        if (existsSync(target)) {
+          unlinkSync(target)
+          console.log('[remove-mock-worker-in-prod] 已删除 dist/mockServiceWorker.js')
+        }
+      },
+    },
   ],
   resolve: {
     alias: {
