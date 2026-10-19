@@ -9,7 +9,11 @@ export default {
     remember: '记住我',
     submit: '登 录',
     success: '登录成功',
-    error: '用户名或密码错误'
+    error: '用户名或密码错误',
+    welcome: '欢迎回来',
+    brandDesc: '企业级数字管理平台',
+    brandTagline: '让工作更高效，让协作更从容',
+    forgot: '忘记密码?'
   },
   header: {
     logout: '退出登录',

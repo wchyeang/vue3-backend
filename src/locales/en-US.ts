@@ -9,7 +9,11 @@ export default {
     remember: 'Remember me',
     submit: 'Log In',
     success: 'Login successful',
-    error: 'Invalid username or password'
+    error: 'Invalid username or password',
+    welcome: 'Welcome back',
+    brandDesc: 'Enterprise Management Platform',
+    brandTagline: 'Streamline your workflow, amplify your productivity.',
+    forgot: 'Forgot password?'
   },
   header: {
     logout: 'Logout',
