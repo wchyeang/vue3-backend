@@ -1,0 +1,79 @@
+export default {
+  login: {
+    title: '后台管理系统',
+    subtitle: '请输入您的账号信息',
+    username: '用户名',
+    usernamePlaceholder: '请输入用户名',
+    password: '密码',
+    passwordPlaceholder: '请输入密码',
+    remember: '记住我',
+    submit: '登 录',
+    success: '登录成功',
+    error: '用户名或密码错误'
+  },
+  header: {
+    logout: '退出登录',
+    profile: '个人中心',
+    settings: '系统设置',
+    language: '语言'
+  },
+  language: {
+    zhCN: '中文',
+    enUS: 'English'
+  },
+  trail: {
+    label: '鼠标拖尾',
+    none: '无拖尾效果',
+    cursor: '基础拖尾',
+    pixel: '像素网格',
+    textRain: 'Emoji 雨'
+  },
+  sidebar: {
+    dashboard: '仪表盘',
+    users: '用户管理',
+    products: '产品管理',
+    orders: '订单管理',
+    analytics: '数据分析',
+    settings: '系统设置',
+    collapse: '收起菜单',
+    expand: '展开菜单'
+  },
+  theme: {
+    dark: '暗色模式',
+    light: '浅色模式',
+    switchDark: '切换暗色模式',
+    switchLight: '切换浅色模式'
+  },
+  common: {
+    confirm: '确定',
+    cancel: '取消',
+    save: '保存',
+    delete: '删除',
+    search: '搜索',
+    reset: '重置',
+    back: '返回'
+  },
+  notFound: {
+    title: '页面开发中',
+    subtitle: '该页面正在开发中，敬请期待',
+    backHome: '返回首页'
+  },
+  home: {
+    revenue: '营收',
+    growth: '增长率',
+    recentOrders: '最近订单',
+    performance: '性能指标',
+    orderId: '订单号',
+    customer: '客户',
+    product: '产品',
+    amount: '金额',
+    status: '状态',
+    completed: '已完成',
+    pending: '待处理',
+    processing: '处理中',
+    cpuUsage: 'FPS 帧率',
+    memoryUsage: 'JS 堆内存',
+    domNodes: 'DOM 节点数',
+    pageLoadTime: '页面加载时间'
+  }
+};
