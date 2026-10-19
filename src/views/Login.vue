@@ -111,7 +111,6 @@
   function handleLocaleChange(val: unknown) {
     const value = String(val);
     locale.value = value;
-    localStorage.setItem('locale', value);
   }
 
   function handleLogin() {

@@ -276,7 +276,6 @@
   function handleLocaleMenuClick(info: { key: string | number }) {
     const value = String(info.key);
     locale.value = value;
-    localStorage.setItem('locale', value);
   }
 
   function handleTrailMenuClick(info: { key: string | number }) {

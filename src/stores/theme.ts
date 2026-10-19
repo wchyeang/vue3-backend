@@ -1,12 +1,17 @@
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { defineStore } from 'pinia';
+import { useLocalStorage } from '@vueuse/core';
 
 export const useThemeStore = defineStore('theme', () => {
-  const isDark = ref(localStorage.getItem('theme') === 'dark');
+  const isDark = useLocalStorage<boolean>('theme', false, {
+    serializer: {
+      read: (raw) => raw === 'dark',
+      write: (val) => (val ? 'dark' : 'light'),
+    },
+  });
 
   function toggleTheme() {
     isDark.value = !isDark.value;
-    localStorage.setItem('theme', isDark.value ? 'dark' : 'light');
   }
 
   watch(
