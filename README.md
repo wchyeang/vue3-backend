@@ -77,13 +77,13 @@ src/
 ## 项目启动
 
 ```sh
-npm install
+pnpm install
 ```
 
 ### 开发（热更新）
 
 ```sh
-npm run dev
+pnpm run dev
 ```
 
 > 开发模式默认启用 **MSW mock**（见下方「接口 Mock」），登录账号 `admin / admin`。
@@ -91,21 +91,21 @@ npm run dev
 ### 构建
 
 ```sh
-npm run build          # 生产构建（先类型检查，再打包）
-npm run build:demo     # Demo 构建（MSW mock，部署到 Cloudflare Pages）
-npm run preview        # 本地预览 dist 产物
+pnpm run build          # 生产构建（先类型检查，再打包）
+pnpm run build:demo     # Demo 构建（MSW mock，部署到 Cloudflare Pages）
+pnpm run preview        # 本地预览 dist 产物
 ```
 
 ### 类型检查
 
 ```sh
-npm run type-check   # vue-tsc --build
+pnpm run type-check   # vue-tsc --build
 ```
 
 ### 单元测试（Vitest）
 
 ```sh
-npm run test:unit
+pnpm run test:unit
 ```
 
 > 说明：默认的 `src/__tests__/App.spec.ts` 与 `e2e/vue.spec.ts` 仍源自脚手架模板（断言 `You did it!`），尚未针对本应用改写；接入真实页面时请补充对应断言。
@@ -117,11 +117,11 @@ npm run test:unit
 npx playwright install
 
 # CI 前需先构建
-npm run build
+pnpm run build
 
-npm run test:e2e                       # 全部
-npm run test:e2e -- --project=chromium # 仅 Chromium
-npm run test:e2e -- --debug            # 调试
+pnpm run test:e2e                       # 全部
+pnpm run test:e2e -- --project=chromium # 仅 Chromium
+pnpm run test:e2e -- --debug            # 调试
 ```
 
 ## 运行模式
@@ -130,9 +130,9 @@ npm run test:e2e -- --debug            # 调试
 
 | 模式 | 命令 | 环境文件 | `VITE_USE_MOCK` | 说明 |
 | ------ | ------ | ------ | :------: | ------ |
-| development | `npm run dev` | `.env.development` | `true` | 本地开发，HMR 热更新 + MSW mock |
-| demo | `npm run build:demo` | `.env.demo` | `true` | 构建产物含 MSW，可部署到 Cloudflare Pages |
-| production | `npm run build` | `.env.production` | `false` | 生产构建，MSW 代码在编译期被 tree-shaking 剔除 |
+| development | `pnpm run dev` | `.env.development` | `true` | 本地开发，HMR 热更新 + MSW mock |
+| demo | `pnpm run build:demo` | `.env.demo` | `true` | 构建产物含 MSW，可部署到 Cloudflare Pages |
+| production | `pnpm run build` | `.env.production` | `false` | 生产构建，MSW 代码在编译期被 tree-shaking 剔除 |
 
 ### 接口 Mock（MSW）
 
@@ -148,7 +148,7 @@ npm run test:e2e -- --debug            # 调试
 **本地开发**
 
 ```sh
-npm run dev
+pnpm run dev
 ```
 
 开发模式默认启用 MSW，登录页会显示 `演示账号：admin / admin` 提示。Vite dev server 的 `/api` 代理配置不会被触发（请求已被 MSW 拦截）。
@@ -156,8 +156,8 @@ npm run dev
 **Demo 模式（无后端部署）**
 
 ```sh
-npm run build:demo    # 以 --mode demo 构建
-npm run preview       # 本地预览，验证部署效果
+pnpm run build:demo    # 以 --mode demo 构建
+pnpm run preview       # 本地预览，验证部署效果
 ```
 
 Demo 构建特点：
@@ -168,7 +168,7 @@ Demo 构建特点：
 
 **生产模式（直连真实后端）**
 
-将 `.env.production` 中 `VITE_USE_MOCK` 设为 `false`，运行 `npm run build` 即可。构建插件会自动：
+将 `.env.production` 中 `VITE_USE_MOCK` 设为 `false`，运行 `pnpm run build` 即可。构建插件会自动：
 
 - 删除 `dist/mockServiceWorker.js`（不暴露 MSW）；
 - 删除 `dist/_redirects`（Docker / Nginx 部署不需要）；
@@ -184,7 +184,7 @@ Demo 模式专为 Cloudflare Pages 设计，无需任何后端服务。
 
 | 配置项 | 值 |
 | ------ | ------ |
-| Build command | `pnpm build:demo`（如使用 npm 则 `npm run build:demo`） |
+| Build command | `pnpm build:demo` |
 | Build output directory | `dist` |
 | 环境变量 | 无需额外设置（`.env.demo` 已包含 `VITE_USE_MOCK=true`） |
 
@@ -203,8 +203,8 @@ Demo 模式专为 Cloudflare Pages 设计，无需任何后端服务。
 ### 代码检查与格式化
 
 ```sh
-npm run lint          # oxlint + eslint（--fix，带缓存）
-npm run format        # prettier 格式化 src/
+pnpm run lint          # oxlint + eslint（--fix，带缓存）
+pnpm run format        # prettier 格式化 src/
 ```
 
 ## 环境要求
