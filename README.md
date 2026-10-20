@@ -46,7 +46,7 @@
 
 ```text
 src/
-├── main.ts                  # 入口：挂载 Pinia / Router / i18n / antd；DEV 下启动 MSW mock
+├── main.ts                  # 入口：挂载 Pinia / Router / i18n / antd；按 VITE_USE_MOCK 条件启动 MSW
 ├── App.vue                  # 根组件：按配置动态加载拖尾效果
 ├── api/                     # 接口层
 │   ├── http.ts              # Axios 实例 + 拦截器（token 注入 / 401 自动刷新队列）
@@ -91,8 +91,9 @@ npm run dev
 ### 构建
 
 ```sh
-npm run build        # 先类型检查，再打包（run-p build + type-check）
-npm run preview      # 预览构建产物
+npm run build          # 生产构建（先类型检查，再打包）
+npm run build:demo     # Demo 构建（MSW mock，部署到 Cloudflare Pages）
+npm run preview        # 本地预览 dist 产物
 ```
 
 ### 类型检查
@@ -123,9 +124,19 @@ npm run test:e2e -- --project=chromium # 仅 Chromium
 npm run test:e2e -- --debug            # 调试
 ```
 
-## 接口 Mock（MSW）
+## 运行模式
 
-开发模式下默认启用 MSW、在浏览器层拦截 /api 请求，无需真实后端即可串联登录 → 鉴权 → 双 token 刷新全链路。
+项目支持三种运行模式，通过 Vite `--mode` 参数选择，每种模式对应不同的 `.env` 文件：
+
+| 模式 | 命令 | 环境文件 | `VITE_USE_MOCK` | 说明 |
+| ------ | ------ | ------ | :------: | ------ |
+| development | `npm run dev` | `.env.development` | `true` | 本地开发，HMR 热更新 + MSW mock |
+| demo | `npm run build:demo` | `.env.demo` | `true` | 构建产物含 MSW，可部署到 Cloudflare Pages |
+| production | `npm run build` | `.env.production` | `false` | 生产构建，MSW 代码在编译期被 tree-shaking 剔除 |
+
+### 接口 Mock（MSW）
+
+通过 Service Worker 在浏览器层拦截 `/api` 请求，无需真实后端即可串联「登录 → 鉴权 → 双 token 刷新」全链路。
 
 | 接口 | 说明 |
 | ------ | ------ |
@@ -134,9 +145,52 @@ npm run test:e2e -- --debug            # 调试
 | `POST /api/auth/logout` | 登出 |
 | `GET /api/user/info` | 校验 accessToken，过期返回 `code: 401`（触发自动刷新） |
 
-- 实现位于 `src/mocks/`（handlers / browser / utils）。
-- 首次接入或更改 mock 时，确保 `public/mockServiceWorker.js` 存在（由 `npx msw init public/` 生成）。
-- 后端就绪后，将 `.env` 中 `VITE_USE_MOCK` 设为 `false` 即可直连真实后端，前端零改动；也可关闭 mock 后在 `vite.config.ts` 配置代理指向后端。
+**本地开发**
+
+```sh
+npm run dev
+```
+
+开发模式默认启用 MSW，登录页会显示 `演示账号：admin / admin` 提示。Vite dev server 的 `/api` 代理配置不会被触发（请求已被 MSW 拦截）。
+
+**Demo 模式（无后端部署）**
+
+```sh
+npm run build:demo    # 以 --mode demo 构建
+npm run preview       # 本地预览，验证部署效果
+```
+
+Demo 构建特点：
+
+- 打包 MSW 代码（`browser.ts` 通过动态 `import()` 加载，仅 Demo 模式包含在产物中）；
+- 保留 `dist/mockServiceWorker.js` 和 `dist/_redirects`（Cloudflare Pages SPA 回退规则）；
+- 登录页显示 Demo 账号提示。
+
+**生产模式（直连真实后端）**
+
+将 `.env.production` 中 `VITE_USE_MOCK` 设为 `false`，运行 `npm run build` 即可。构建插件会自动：
+
+- 删除 `dist/mockServiceWorker.js`（不暴露 MSW）；
+- 删除 `dist/_redirects`（Docker / Nginx 部署不需要）；
+- 通过 Vite tree-shaking 剔除所有 MSW 代码。
+
+> 实现位于 `src/mocks/`（handlers / browser / utils），由 `src/main.ts` 中的 `import.meta.env.VITE_USE_MOCK === 'true'` 条件控制启动。首次接入或更改 mock 时，确保 `public/mockServiceWorker.js` 存在（由 `npx msw init public/` 生成）。
+
+## Cloudflare Pages 部署（Demo 模式）
+
+Demo 模式专为 Cloudflare Pages 设计，无需任何后端服务。
+
+**部署配置**
+
+| 配置项 | 值 |
+| ------ | ------ |
+| Build command | `pnpm build:demo`（如使用 npm 则 `npm run build:demo`） |
+| Build output directory | `dist` |
+| 环境变量 | 无需额外设置（`.env.demo` 已包含 `VITE_USE_MOCK=true`） |
+
+**SPA 路由回退**
+
+项目使用 History 路由模式（`createWebHistory`），因此 `public/_redirects` 中配置了 `/* /index.html 200`，确保 Cloudflare Pages 处理 SPA 路由时不会返回 404。Demo 构建时该文件会保留，生产构建时自动移除。
 
 ## 双 token 鉴权设计
 
@@ -167,7 +221,18 @@ npm run format        # prettier 格式化 src/
 
 ## 环境变量
 
+项目使用 Vite 的 [多环境模式](https://cn.vite.dev/guide/env-and-mode.html)，不同模式加载不同 `.env` 文件：
+
+| 文件 | 适用模式 | 说明 |
+| ------ | ------ | ------ |
+| `.env` | 所有模式 | 共享配置（`VITE_API_BASE_URL` 等） |
+| `.env.development` | `dev` | 开发专用，默认 `VITE_USE_MOCK=true` |
+| `.env.demo` | `build:demo` | Demo 构建，`VITE_USE_MOCK=true` |
+| `.env.production` | `build` | 生产构建，`VITE_USE_MOCK=false` |
+
+**核心变量**
+
 - `VITE_API_BASE_URL`：接口基础路径（默认 `/api`），`api/http.ts` 以此作为 Axios `baseURL`。
-- `VITE_USE_MOCK`：是否启用 MSW mock。开发模式默认 `true`；置为 `false` 后直连真实后端。
+- `VITE_USE_MOCK`：是否启用 MSW mock。`'true'` 时通过动态 `import()` 加载 MSW worker，`'false'` 时 MSW 代码在编译期被完全剔除。
 - `import.meta.env.BASE_URL`：路由 history 基路径（Vite 提供）。
 - 类型声明见 `env.d.ts` 的 `ImportMetaEnv`。
