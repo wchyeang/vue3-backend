@@ -1,8 +1,10 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { message } from 'ant-design-vue';
 import { useAuthStorage } from '@/composables/useAuthStorage';
+import { AppError, ErrorCode } from '@/types/error';
+import type { ErrorKind } from '@/types/error';
 import type { ApiResponse } from '@/types/api';
+import i18n from '@/locales';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const REFRESH_URL = '/auth/refresh';
@@ -53,7 +55,7 @@ async function doRefresh() {
     { refreshToken }
   );
   if (data.code !== 0) {
-    throw new Error(data.message);
+    throw new AppError(data.message || '登录已失效', data.code, 'business');
   }
   useAuthStorage().setAccessToken(data.data.accessToken);
   useAuthStorage().setRefreshToken(data.data.refreshToken);
@@ -85,11 +87,28 @@ function retryAfterRefresh(config: AxiosRequestConfig) {
   });
 }
 
-function handleBusinessError(code: number, error: Error) {
-  if (typeof window !== 'undefined') {
-    message.error(error.message || '请求失败');
+/** 抛出分类后的 AppError，消息由全局兜底按 locale 解析展示 */
+function throwAppError(code: number, serverMessage?: string, kind: ErrorKind = 'unknown'): never {
+  throw new AppError(serverMessage || '', code, kind, kind === 'http' ? code : undefined);
+}
+
+/** 按 locale 解析 AppError 的展示消息，优先走 i18n 按错误码映射，其次使用后端消息 */
+function resolveErrorMessage(error: AppError): string {
+  if (error.kind === 'business') {
+    const key = `error.business.${error.code}`;
+    const mapped = i18n.global.t(key);
+    if (mapped !== key) return mapped;
+    return error.message || i18n.global.t('error.unknown');
   }
-  void code;
+  if (error.kind === 'network') return i18n.global.t('error.network');
+  if (error.kind === 'http' && error.httpStatus != null) {
+    const key = `error.http.${error.httpStatus}`;
+    const mapped = i18n.global.t(key);
+    if (mapped !== key) return mapped;
+    if (error.httpStatus >= 500) return i18n.global.t('error.serviceUnavailable');
+    return i18n.global.t('error.unknown');
+  }
+  return error.message || i18n.global.t('error.unknown');
 }
 
 // 响应拦截器：统一业务码处理 + 401 自动刷新
@@ -101,11 +120,10 @@ instance.interceptors.response.use(
       return apiData.data as unknown as AxiosResponse;
     }
     // token 失效：进入刷新重试流程
-    if (apiData.code === 401 && !isInWhiteList(config.url)) {
+    if (apiData.code === ErrorCode.AUTH_TOKEN_EXPIRED && !isInWhiteList(config.url)) {
       return retryAfterRefresh(config) as unknown as Promise<AxiosResponse>;
     }
-    handleBusinessError(apiData.code, new Error(apiData.message));
-    return Promise.reject(new Error(apiData.message));
+    throwAppError(apiData.code, apiData.message, 'business');
   },
   (error) => {
     const status = error.response?.status;
@@ -114,10 +132,23 @@ instance.interceptors.response.use(
     if (status === 401 && !isInWhiteList(config?.url)) {
       return retryAfterRefresh(config) as unknown as Promise<AxiosResponse>;
     }
-    handleBusinessError(status, error);
-    return Promise.reject(error);
+    // 网络错误 — 无任何响应
+    if (!error.response) {
+      throw new AppError(i18n.global.t('error.network'), 0, 'network');
+    }
+    throwAppError(status ?? 0, error.response?.data?.message, 'http');
   }
 );
+
+// 全局兜底：对所有 AppError 按 locale 解析并弹窗
+instance.interceptors.response.use(undefined, (error) => {
+  if (error instanceof AppError) {
+    import('ant-design-vue').then(({ message }) => {
+      setTimeout(() => message.error(resolveErrorMessage(error)), 100);
+    });
+  }
+  return Promise.reject(error);
+});
 
 interface TokenPairPayload {
   accessToken: string;

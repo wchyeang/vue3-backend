@@ -79,5 +79,22 @@ export default {
     memoryUsage: 'JS Heap Memory',
     domNodes: 'DOM Nodes',
     pageLoadTime: 'Page Load Time'
+  },
+  error: {
+    unknown: 'System busy, please try again later',
+    serviceUnavailable: 'Service temporarily unavailable, please try again later',
+    network: 'Network error, please check your connection',
+    business: {
+      40101: 'Invalid username or password',
+    },
+    http: {
+      400: 'Invalid request parameters',
+      403: 'Access denied',
+      404: 'Resource not found',
+      500: 'Internal server error, please try again later',
+      502: 'Service temporarily unavailable, please try again later',
+      503: 'Service under maintenance',
+      504: 'Gateway timeout, please try again later',
+    },
   }
 };

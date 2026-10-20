@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { ApiResponse } from '@/types/api';
+import { ErrorCode } from '@/types/error';
 import {
   ACCESS_TOKEN_TTL,
   REFRESH_TOKEN_TTL,
@@ -18,7 +19,7 @@ const loginHandler = http.post(`${BASE}/auth/login`, async ({ request }) => {
   const { username, password } = (await request.json()) as { username?: string; password?: string };
 
   if (username !== 'admin' || password !== 'admin') {
-    const body: ApiResponse = { code: 401, message: '用户名或密码错误', data: null };
+    const body: ApiResponse = { code: ErrorCode.AUTH_WRONG_CREDENTIALS, message: '用户名或密码错误', data: null };
     return HttpResponse.json(body);
   }
 
@@ -41,7 +42,7 @@ const refreshHandler = http.post(`${BASE}/auth/refresh`, async ({ request }) => 
   const payload = parseToken(refreshToken);
 
   if (!payload || payload.type !== 'refresh' || isTokenExpired(refreshToken)) {
-    const body: ApiResponse = { code: 401, message: '登录已失效，请重新登录', data: null };
+    const body: ApiResponse = { code: ErrorCode.AUTH_TOKEN_EXPIRED, message: '登录已失效，请重新登录', data: null };
     return HttpResponse.json(body);
   }
 
@@ -63,13 +64,13 @@ const logoutHandler = http.post(`${BASE}/auth/logout`, () => {
   return HttpResponse.json(body);
 });
 
-// 用户信息：验证 accessToken，过期则返回 401（用于触发前端自动刷新）
+// 用户信息：验证 accessToken，过期则返回 40103（用于触发前端自动刷新）
 const userInfoHandler = http.get(`${BASE}/user/info`, ({ request }) => {
   const token = readBearerAuthorization(request.headers.get('Authorization'));
   const payload = parseToken(token);
 
   if (!payload || payload.type !== 'access' || isTokenExpired(token)) {
-    const body: ApiResponse = { code: 401, message: '登录已过期', data: null };
+    const body: ApiResponse = { code: ErrorCode.AUTH_TOKEN_EXPIRED, message: '登录已过期', data: null };
     return HttpResponse.json(body);
   }
 

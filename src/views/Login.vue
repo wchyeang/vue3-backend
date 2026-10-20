@@ -148,22 +148,25 @@
     locale.value = String(info.key);
   }
 
-  function handleLogin() {
-    formRef.value?.validate().then(async () => {
-      loading.value = true;
-      try {
-        await authStore.login({
-          username: formState.username,
-          password: formState.password
-        });
-        message.success(t('login.success'));
-        router.push('/');
-      } catch {
-        message.error(t('login.error'));
-      } finally {
-        loading.value = false;
-      }
-    });
+  async function handleLogin() {
+    try {
+      await formRef.value?.validate();
+    } catch {
+      return;
+    }
+    loading.value = true;
+    try {
+      await authStore.login({
+        username: formState.username,
+        password: formState.password
+      });
+      message.success(t('login.success'));
+      router.push('/');
+    } catch {
+      // 错误提示由全局兜底处理
+    } finally {
+      loading.value = false;
+    }
   }
 </script>
 
