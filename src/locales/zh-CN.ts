@@ -13,7 +13,8 @@ export default {
     welcome: '欢迎回来',
     brandDesc: '企业级数字管理平台',
     brandTagline: '让工作更高效，让协作更从容',
-    forgot: '忘记密码?'
+    forgot: '忘记密码?',
+    demoHint: '演示账号：admin / admin'
   },
   header: {
     logout: '退出登录',

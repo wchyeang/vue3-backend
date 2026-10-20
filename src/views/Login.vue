@@ -98,6 +98,8 @@
               {{ t('login.submit') }}
             </Button>
           </Form.Item>
+
+          <div v-if="isMockMode" class="demo-hint">{{ t('login.demoHint') }}</div>
         </Form>
       </div>
     </div>
@@ -122,6 +124,8 @@
   const router = useRouter();
   const themeStore = useThemeStore();
   const authStore = useAuthStore();
+
+  const isMockMode = import.meta.env.VITE_USE_MOCK === 'true';
 
   const formRef = ref();
   const loading = ref(false);
@@ -1096,5 +1100,23 @@
     background: rgba(0, 0, 0, 0.06);
     border-color: #1677ff;
     color: #1677ff;
+  }
+
+  /* ========== 演示账号提示 ========== */
+  .demo-hint {
+    margin-top: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    text-align: center;
+    font-size: 12px;
+    color: rgba(165, 180, 252, 0.9);
+  }
+
+  .login[data-theme='light'] .demo-hint {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
   }
 </style>

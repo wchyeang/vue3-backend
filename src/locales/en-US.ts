@@ -13,7 +13,8 @@ export default {
     welcome: 'Welcome back',
     brandDesc: 'Enterprise Management Platform',
     brandTagline: 'Streamline your workflow, amplify your productivity.',
-    forgot: 'Forgot password?'
+    forgot: 'Forgot password?',
+    demoHint: 'Demo account: admin / admin'
   },
   header: {
     logout: 'Logout',
