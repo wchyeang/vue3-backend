@@ -70,7 +70,7 @@
           @finish="handleLogin">
           <Form.Item name="username">
             <Input v-model:value="formState.username" size="large" :placeholder="t('login.usernamePlaceholder')"
-              autocomplete="username" class="glass-input">
+              autocomplete="username" class="glass-input" :disabled="loading">
               <template #prefix>
                 <UserOutlined />
               </template>
@@ -79,7 +79,8 @@
 
           <Form.Item name="password">
             <Input.Password v-model:value="formState.password" size="large" autocomplete="current-password"
-              :placeholder="t('login.passwordPlaceholder')" class="glass-input" @keydown.enter="handleLogin">
+              :placeholder="t('login.passwordPlaceholder')" class="glass-input" :disabled="loading"
+              @keydown.enter="handleLogin">
               <template #prefix>
                 <LockOutlined />
               </template>
@@ -88,13 +89,14 @@
 
           <div class="form-row">
             <Form.Item noStyle>
-              <Checkbox v-model:checked="remember">{{ t('login.remember') }}</Checkbox>
+              <Checkbox v-model:checked="remember" :disabled="loading">{{ t('login.remember') }}</Checkbox>
             </Form.Item>
             <a class="forgot-link">{{ t('login.forgot') }}</a>
           </div>
 
           <Form.Item>
-            <Button type="primary" html-type="submit" size="large" block :loading="loading" class="submit-btn">
+            <Button type="primary" html-type="submit" size="large" block :loading="loading" :disabled="loading"
+              class="submit-btn">
               {{ t('login.submit') }}
             </Button>
           </Form.Item>
@@ -153,6 +155,7 @@
   }
 
   async function handleLogin() {
+    if (loading.value) return;
     try {
       await formRef.value?.validate();
     } catch {
